@@ -1,10 +1,12 @@
 class RastreamentosController < ApplicationController
   before_action :set_rastreamento, only: [:show, :edit, :update, :destroy]
 
+  skip_before_action :verify_authenticity_token
+
   # GET /rastreamentos
   # GET /rastreamentos.json
   def index
-    @rastreamentos = Rastreamento.all
+    @rastreamentos = Rastreamento.all.order("data_hora desc").limit(50)
   end
 
   # GET /rastreamentos/1
@@ -29,7 +31,7 @@ class RastreamentosController < ApplicationController
     respond_to do |format|
       if @rastreamento.save
         format.html { redirect_to @rastreamento, notice: 'Rastreamento was successfully created.' }
-        format.json { render :show, status: :created, location: @rastreamento }
+        format.json { render :nothing => true, :status => 200, :content_type => 'text/html' }
       else
         format.html { render :new }
         format.json { render json: @rastreamento.errors, status: :unprocessable_entity }
@@ -69,6 +71,6 @@ class RastreamentosController < ApplicationController
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def rastreamento_params
-      params.require(:apresentacao).permit(:visitante, :url, :titulo, :data_hora)
+      params.require(:rastreamento).permit(:visitante, :url, :titulo, :data_hora)
     end
 end

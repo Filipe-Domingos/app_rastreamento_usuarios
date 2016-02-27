@@ -7,6 +7,8 @@ Rails.application.routes.draw do
 
   get '/sobre', to: 'apresentacao#sobre'
 
-  resources :rastreamentos, only: [:index]
+  resources :rastreamentos, only: [:index, :create]
+
+  match '*a', :to => 'errors#routing', via: :get
 
 end
