@@ -29,12 +29,17 @@ class RastreamentosController < ApplicationController
     @rastreamento = Rastreamento.new(rastreamento_params)
 
     respond_to do |format|
-      if @rastreamento.save
-        format.html { redirect_to @rastreamento, notice: 'Rastreamento was successfully created.' }
+      if ENV['USE_SIDEKIQ'] == "true"
+        RastreamentoWorker.perform_async(rastreamento_params)
         format.json { render :nothing => true, :status => 200, :content_type => 'text/html' }
       else
-        format.html { render :new }
-        format.json { render json: @rastreamento.errors, status: :unprocessable_entity }
+        if @rastreamento.save
+          format.html { redirect_to @rastreamento, notice: 'Rastreamento was successfully created.' }
+          format.json { render :nothing => true, :status => 200, :content_type => 'text/html' }
+        else
+          format.html { render :new }
+          format.json { render json: @rastreamento.errors, status: :unprocessable_entity }
+        end
       end
     end
   end
