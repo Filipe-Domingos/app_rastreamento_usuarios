@@ -26,16 +26,24 @@ class RastreamentosController < ApplicationController
   # POST /rastreamentos
   # POST /rastreamentos.json
   def create
+    mensagem = validate_params
+
+    if !mensagem.empty?
+      return respond_to do |format|
+        format.json { render json: mensagem, status: :bad_request }
+      end
+    end
+
     @rastreamento = Rastreamento.new(rastreamento_params)
 
     respond_to do |format|
       if ENV['USE_SIDEKIQ'] == "true"
         RastreamentoWorker.perform_async(rastreamento_params)
-        format.json { render :nothing => true, :status => 200, :content_type => 'text/html' }
+        format.json { render :nothing => true, status: :created }
       else
         if @rastreamento.save
           format.html { redirect_to @rastreamento, notice: 'Rastreamento was successfully created.' }
-          format.json { render :nothing => true, :status => 200, :content_type => 'text/html' }
+          format.json { render :nothing => true, status: :created }
         else
           format.html { render :new }
           format.json { render json: @rastreamento.errors, status: :unprocessable_entity }
@@ -69,13 +77,33 @@ class RastreamentosController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_rastreamento
-      @rastreamento = Rastreamento.find(params[:id])
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_rastreamento
+    @rastreamento = Rastreamento.find(params[:id])
+  end
 
-    # Never trust parameters from the scary internet, only allow the white list through.
-    def rastreamento_params
-      params.require(:rastreamento).permit(:visitante, :url, :titulo, :data_hora)
+  # Never trust parameters from the scary internet, only allow the white list through.
+  def rastreamento_params
+    params.require(:rastreamento).permit(:visitante, :url, :titulo, :data_hora)
+  end
+
+  def validate_params
+    mensagem = []
+    mensagem << 'Parâmetro visitante inexistente.' if params[:rastreamento][:visitante].nil? || params[:rastreamento][:visitante].empty?
+    mensagem << 'Parâmetro url inexistente.' if params[:rastreamento][:url].nil? || params[:rastreamento][:url].empty?
+    mensagem << 'Parâmetro título inexistente.' if params[:rastreamento][:titulo].nil? || params[:rastreamento][:titulo].empty?
+    mensagem << 'Parâmetro data/hora inexistente.' if params[:rastreamento][:data_hora].nil? || params[:rastreamento][:data_hora].empty?
+    mensagem_formatted = format_message(mensagem)
+    return {mensagem: mensagem_formatted}.to_json if !mensagem.empty?
+    ''
+  end
+
+  def format_message(mensagem)
+    msg = ''
+    mensagem.each_with_index do |m, index|
+      msg += m
+      msg += " " if index < mensagem.count - 1
     end
+    msg
+  end
 end

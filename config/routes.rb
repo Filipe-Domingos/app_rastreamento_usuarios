@@ -2,8 +2,6 @@ require 'sidekiq/web'
 
 Rails.application.routes.draw do
 
-  resources :rastreamentos
-
   root to: 'apresentacao#home'
 
   resources :contatos, only: [:new, :create]
