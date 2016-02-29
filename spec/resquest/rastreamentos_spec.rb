@@ -36,8 +36,13 @@ RSpec.describe "Rastreamentos API", :type => :request do
         expect(json['mensagem']).to eq 'Parâmetro data/hora inexistente.'
       end
     end
-    context 'com argumentos válidos' do
-      it "post completo" do
+    context 'with valid parameters' do
+      it "complete post" do
+        expect{
+          post_params = {rastreamento: {visitante: "visitante A", url: '/', titulo: "Home", data_hora:"10:01:02"}}
+          post rastreamentos_path(post_params), { :format => :json }
+          expect(response).to have_http_status(:created)
+        }.to change(Rastreamento, :count).by(1)
         expect{
           post_params = {rastreamento: {visitante: "visitante A", url: '/', titulo: "Home", data_hora:"10:01:02"}}
           post rastreamentos_path(post_params), { :format => :json }
