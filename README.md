@@ -59,8 +59,21 @@ Open a browser at the address:
 ```console
 http://localhost:3000/
 ```
-
 Click links 'Home' 'Contato' 'Sobre' at the navbar and finally click 'Relatório de Rastremaneto' to get the user's visit tracking report.
+
+### Optional Execution of Sidekiq
+
+If the application is configured to use Sidekiq you must start it with:
+
+```console
+bundle exec sidekiq
+```
+
+You can monitor the default queue at the address:
+
+```console
+http://localhost:3000/sidekiq
+```
 
 ##Testing the application
 
